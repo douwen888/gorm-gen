@@ -1,37 +1,61 @@
 # GORM Gen
 
-Friendly & Safer GORM powered by Code Generation.
+注意，本项目迁移自项目 gorm.in/gen@0.3.27
 
-[![Release](https://img.shields.io/github/v/release/go-gorm/gen)](https://github.com/go-gorm/gen/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/go-gorm/gen)](https://goreportcard.com/report/github.com/go-gorm/gen)
-[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
-[![OpenIssue](https://img.shields.io/github/issues/go-gorm/gen)](https://github.com/go-gorm/gen/issues?q=is%3Aopen+is%3Aissue)
-[![ClosedIssue](https://img.shields.io/github/issues-closed/go-gorm/gen)](https://github.com/go-gorm/gen/issues?q=is%3Aissue+is%3Aclosed)
-[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/go-gorm/gen)](https://www.tickgit.com/browse?repo=github.com/go-gorm/gen)
-[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/gorm.io/gen?tab=doc)
+此处有做定制化修改：
 
-## Overview
+1.生成的model中移除注释，防止生成的代码过长
 
-- Idiomatic & Reusable API from Dynamic Raw SQL
-- 100% Type-safe DAO API without `interface{}`
-- Database To Struct follows GORM conventions
-- GORM under the hood, supports all features, plugins, DBMS that GORM supports
+使用本项目需要在项目中引入gorm和gorm-gen
 
-## Getting Started
+```bash
+go get -u gorm.io/gorm
+go get -u github.com/zhangyiming748/gorm-gen
+```
+使用示例
 
-* Gen Guides [https://gorm.io/gen/index.html](https://gorm.io/gen/index.html)
-* GORM Guides [http://gorm.io/docs](http://gorm.io/docs)
+```go
+package main
 
-## Maintainers
+import (
+	"github.com/douwen888/gorm-gen"
+	"github.com/huandu/xstrings"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
 
-[@riverchu](https://github.com/riverchu) [@iDer](https://github.com/idersec) [@qqxhb](https://github.com/qqxhb) [@dino-ma](https://github.com/dino-ma)
+func main() {
+	// 连接数据库
+	dsn := "user:passwd@tcp(host:port)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
 
-[@jinzhu](https://github.com/jinzhu)
+	// 初始化生成器
+	g := gen.NewGenerator(gen.Config{
+		//OutPath:      "internal/dao/gen", // dao 输出目录
+		ModelPkgPath: "internal/model", // model 输出目录
+	})
 
-## Contributing
+	// 使用数据库
+	g.UseDB(db)
+	// 映射所有整型为 int64
+	g.WithDataTypeMap(map[string]func(columnType gorm.ColumnType) (dataType string){
+		"tinyint":   func(gorm.ColumnType) string { return "int64" },
+		"smallint":  func(gorm.ColumnType) string { return "int64" },
+		"mediumint": func(gorm.ColumnType) string { return "int64" },
+		"int":       func(gorm.ColumnType) string { return "int64" },
+		"bigint":    func(gorm.ColumnType) string { return "int64" },
+	})
+	// 使用驼峰命名法
+	g.WithJSONTagNameStrategy(func(columnName string) string {
+		return xstrings.ToCamelCase(columnName)
+	})
+	// 生成全部表
+	g.GenerateAllTable()
+	// 执行生成
+	g.Execute()
 
-[You can help to deliver a better GORM/Gen, check out things you can do](https://gorm.io/contribute.html)
-
-## License
-
-Released under the [MIT License](https://github.com/go-gorm/gen/blob/master/License)
+}
+```

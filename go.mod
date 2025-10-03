@@ -1,6 +1,7 @@
-module gorm.io/gen
+module github.com/douwen888/gorm-gen
 
-go 1.18
+
+go 1.25
 
 require (
 	golang.org/x/tools v0.17.0
