@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"gorm.io/gen/field"
+	"github.com/douwen888/gorm-gen/field"
 )
 
 const (

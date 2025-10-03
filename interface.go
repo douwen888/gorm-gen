@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
-	"gorm.io/gen/field"
+	"github.com/douwen888/gorm-gen/field"
 )
 
 type (
