@@ -115,12 +115,13 @@ func (c *Column) buildGormTag() field.GormTag {
 		tag.Set(field.TagKeyGormDefault, dtValue)
 	}
 
-	if comment, ok := c.Comment(); ok && comment != "" {
-		if c.multilineComment() {
-			comment = strings.ReplaceAll(comment, "\n", "\\n")
-		}
-		tag.Set(field.TagKeyGormComment, comment)
-	}
+	// done luomo 移除注释，避免生成代码过长
+	//if comment, ok := c.Comment(); ok && comment != "" {
+	//	if c.multilineComment() {
+	//		comment = strings.ReplaceAll(comment, "\n", "\\n")
+	//	}
+	//	tag.Set(field.TagKeyGormComment, comment)
+	//}
 
 	return tag
 }
